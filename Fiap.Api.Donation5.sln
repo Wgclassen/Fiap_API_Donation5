@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35913.81 d17.13
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fiap.Api.Donation5", "Fiap.Api.Donation5\Fiap.Api.Donation5.csproj", "{CED370D6-FCC0-43B7-8F69-E949868C0DC5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CED370D6-FCC0-43B7-8F69-E949868C0DC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CED370D6-FCC0-43B7-8F69-E949868C0DC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CED370D6-FCC0-43B7-8F69-E949868C0DC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CED370D6-FCC0-43B7-8F69-E949868C0DC5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6DE30B26-8420-476C-B91A-4FC73DF0A799}
+	EndGlobalSection
+EndGlobal
