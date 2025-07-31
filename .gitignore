@@ -485,4 +485,5 @@ $RECYCLE.BIN/
 
 # ASP.NET configuration
 appsettings*.json
+**/Properties/launchSettings.json
 

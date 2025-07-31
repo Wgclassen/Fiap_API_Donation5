@@ -30,6 +30,41 @@ namespace Fiap.Api.Donation5.Data
                 new CategoriaModel() { CategoriaId = 2, NomeCategoria = "Televisores", Descricao = "Descrição para TV" }
                 );
 
+            modelBuilder.Entity<UsuarioModel>(entity =>
+            {
+                entity.ToTable("Usuario");
+                entity.HasKey(k => k.UsuarioId);
+                entity.Property(k => k.UsuarioId).ValueGeneratedOnAdd();
+
+                entity.Property(p => p.NomeUsuario)
+                .IsRequired()
+                .HasMaxLength(50);
+
+                entity.Property(p => p.EmailUsuario)
+                .IsRequired()
+                .HasMaxLength(50);
+
+                entity.Property(p => p.Senha)
+                .IsRequired()
+                .HasMaxLength(50);
+
+                entity.Property(p => p.Regra)
+                .HasMaxLength(20);
+
+                entity.HasIndex(e => e.EmailUsuario).IsUnique();
+
+                entity.HasIndex(e => new
+                {
+                    e.EmailUsuario,
+                    e.Senha
+                });
+            });
+
+            modelBuilder.Entity<UsuarioModel>().HasData(
+                new UsuarioModel() { UsuarioId = 1, NomeUsuario = "Willian", Senha = "senha", EmailUsuario = "wil@lia.n" },
+                new UsuarioModel() { UsuarioId = 2, NomeUsuario = "Fulano", Senha = "senha", EmailUsuario = "ful@an.o" }
+                );
+
             base.OnModelCreating(modelBuilder);
         }
 

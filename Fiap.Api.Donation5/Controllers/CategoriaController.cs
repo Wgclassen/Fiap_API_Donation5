@@ -1,4 +1,7 @@
-﻿using Fiap.Api.Donation5.Models;
+﻿using Fiap.Api.Donation5.Data;
+using Fiap.Api.Donation5.Models;
+using Fiap.Api.Donation5.Repository;
+using Fiap.Api.Donation5.Repository.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,22 +12,17 @@ namespace Fiap.Api.Donation5.Controllers
     public class CategoriaController : ControllerBase
     {
 
+        private readonly ICategoriaRepository _categoriaRepository;
+
+        public CategoriaController(DataContext dataContext)
+        {
+            _categoriaRepository = new CategoriaRepository(dataContext);
+        }
+
         [HttpGet]
         public IList<CategoriaModel> Get()
         {
-            return new List<CategoriaModel>()
-            {
-            new CategoriaModel()
-            {
-                CategoriaId = 1,
-                NomeCategoria = "Celular"
-            },
-            new CategoriaModel()
-            {
-                CategoriaId = 2,
-                NomeCategoria = "Televisor"
-            }
-            };
+            return _categoriaRepository.FindAll();
         }
 
         [HttpGet("{id:int}")]
