@@ -3,47 +3,46 @@ using Fiap.Api.Donation5.Models;
 using Fiap.Api.Donation5.Repository.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fiap.Api.Donation5.Repository
+namespace Fiap.Api.Donation5.Repository;
+
+public class CategoriaRepository : ICategoriaRepository
 {
-    public class CategoriaRepository : ICategoriaRepository
+    private readonly DataContext _dataContext;
+
+    public CategoriaRepository(DataContext dataContext)
     {
-        private readonly DataContext _dataContext;
+        _dataContext = dataContext;
+    }
 
-        public CategoriaRepository(DataContext dataContext)
-        {
-            _dataContext = dataContext;
-        }
+    public async Task DeleteAsync(int id)
+    {
+        var categoria = new CategoriaModel() { CategoriaId = id };
 
-        public void Delete(int id)
-        {
-            var categoria = new CategoriaModel() { CategoriaId = id };
+        _dataContext.Categorias.Remove(categoria);
+        await _dataContext.SaveChangesAsync();
+    }
 
-            _dataContext.Categorias.Remove(categoria);
-            _dataContext.SaveChanges();
-        }
+    public async Task<IList<CategoriaModel>> FindAllAsync()
+    {
+        return await _dataContext.Categorias.AsNoTracking().ToListAsync();
+    }
 
-        public IList<CategoriaModel> FindAll()
-        {
-            return _dataContext.Categorias.AsNoTracking().ToList();
-        }
+    public async Task<CategoriaModel> FindByIdAsync(int id)
+    {
+        return await _dataContext.Categorias.AsNoTracking().FirstOrDefaultAsync(c => c.CategoriaId == id);
+    }
 
-        public CategoriaModel FindById(int id)
-        {
-            return _dataContext.Categorias.AsNoTracking().FirstOrDefault(c => c.CategoriaId == id);
-        }
+    public async Task<int> InsertAsync(CategoriaModel categoriaModel)
+    {
+        _dataContext.Categorias.Add(categoriaModel);
+        await _dataContext.SaveChangesAsync();
 
-        public int Insert(CategoriaModel categoriaModel)
-        {
-            _dataContext.Categorias.Add(categoriaModel);
-            _dataContext.SaveChanges();
+        return categoriaModel.CategoriaId;
+    }
 
-            return categoriaModel.CategoriaId;
-        }
-
-        public void Update(CategoriaModel categoriaModel)
-        {
-            _dataContext.Categorias.Update(categoriaModel);
-            _dataContext.SaveChanges();
-        }
+    public async Task UpdateAsync(CategoriaModel categoriaModel)
+    {
+        _dataContext.Categorias.Update(categoriaModel);
+        await _dataContext.SaveChangesAsync();
     }
 }
