@@ -20,37 +20,80 @@ namespace Fiap.Api.Donation5.Controllers
         }
 
         [HttpGet]
-        public IList<CategoriaModel> Get()
+        public ActionResult<IList<CategoriaModel>> Get()
         {
-            return _categoriaRepository.FindAll();
+            var categorias = _categoriaRepository.FindAll() ?? new List<CategoriaModel>();
+            return Ok(categorias);
         }
 
         [HttpGet("{id:int}")]
-        public CategoriaModel Get([FromRoute] int id)
+        public ActionResult<CategoriaModel> Get([FromRoute] int id)
         {
-            return new CategoriaModel()
+            var categoria = _categoriaRepository.FindById(id);
+
+            if (categoria == null)
             {
-                CategoriaId = 1,
-                NomeCategoria = "Celular"
-            };
+                return NotFound();
+            } else
+            {
+                return Ok(categoria);
+            }
         }
 
         [HttpPost]
-        public int Post([FromBody] CategoriaModel categoriaModel)
+        public ActionResult<CategoriaModel> Post([FromBody] CategoriaModel categoriaModel)
         {
-            return 1311;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            } 
+            else
+            {
+                categoriaModel.CategoriaId = _categoriaRepository.Insert(categoriaModel);
+
+                return CreatedAtAction( nameof(Get), new { id = categoriaModel.CategoriaId} , categoriaModel);
+            }
+
         }
 
         [HttpPut("{id:int}")]
-        public int Put([FromRoute] int id, [FromBody] CategoriaModel categoriaModel)
+        public ActionResult Put([FromRoute] int id, [FromBody] CategoriaModel categoriaModel)
         {
-            return 1311;
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            if (categoriaModel.CategoriaId != id)
+            {
+                return BadRequest(new { erro = "IDs divergentes" });
+            }
+
+            if (_categoriaRepository.FindById(id) == null)
+            {
+                return NotFound();
+            } 
+
+            _categoriaRepository.Update(categoriaModel);
+            return NoContent();
         }
 
         [HttpDelete("{id:int}")]
-        public int Delete([FromRoute] int id)
+        public ActionResult Delete([FromRoute] int id)
         {
-            return 1333;
+
+            if (id == 0)
+            {
+                return BadRequest();
+            }
+
+            if (_categoriaRepository.FindById(id) == null)
+            {
+                return NotFound();
+            }
+
+            _categoriaRepository.Delete(id);
+            return NoContent();
         }
     }
 }
