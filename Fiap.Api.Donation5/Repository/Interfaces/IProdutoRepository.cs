@@ -12,5 +12,4 @@ public interface IProdutoRepository
     //Task UpdateAsync(ProdutoModel produtoModel);
     //Task DeleteAsync(ProdutoModel produtoModel);
     //Task DeleteAsync(int id);
-
 }
