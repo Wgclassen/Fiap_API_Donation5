@@ -67,7 +67,6 @@ namespace Fiap.Api.Donation5.Data
                 new UsuarioModel() { UsuarioId = 2, NomeUsuario = "Fulano", Senha = "senha", EmailUsuario = "ful@an.o" }
                 );
 
-            #region Produto
             modelBuilder.Entity<ProdutoModel>(entity =>
             {
                 entity.ToTable("Produto");
@@ -93,6 +92,18 @@ namespace Fiap.Api.Donation5.Data
 
                 entity.Property(e => e.DataExpiracao)
                       .IsRequired();
+
+                entity.HasOne(e => e.Categoria)
+                    .WithMany()
+                    .HasForeignKey(e => e.CategoriaId)
+                    .IsRequired();
+
+                entity.HasOne(e => e.Usuario)
+                    .WithMany()
+                    .HasForeignKey(entity => entity.UsuarioId)
+                    .IsRequired();
+
+                entity.HasIndex(e => e.Nome);
             });
             base.OnModelCreating(modelBuilder);
         }
