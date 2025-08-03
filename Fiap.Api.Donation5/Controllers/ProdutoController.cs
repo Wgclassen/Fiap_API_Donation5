@@ -9,7 +9,7 @@ namespace Fiap.Api.Donation5.Controllers
 {
     [ApiController]
     [Route("api/v{version:apiVersion}/[controller]")]
-    [ApiVersion("1.0")]
+    [ApiVersion("1.0", Deprecated = true)]
     [ApiVersion("2.0")]
     [ApiVersion("3.0")]
     
@@ -61,7 +61,7 @@ namespace Fiap.Api.Donation5.Controllers
         }
 
         [HttpGet()]
-        [ApiVersion("1.0")]
+        [ApiVersion("1.0", Deprecated = true)]
         public async Task<ActionResult<ProdutoModel>> GetV1()
         {
             var produtos = await _produtoRepository.FindAllAsync() ?? new List<ProdutoModel>();
@@ -79,6 +79,5 @@ namespace Fiap.Api.Donation5.Controllers
 
             return Ok(produto);
         }
-
     }
 }

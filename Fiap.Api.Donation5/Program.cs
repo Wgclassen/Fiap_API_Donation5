@@ -1,10 +1,14 @@
+using Fiap.Api.Donation5;
 using Fiap.Api.Donation5.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Tokens.Experimental;
+using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -14,7 +18,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddApiVersioning(builder =>
 {
-    builder.DefaultApiVersion = new ApiVersion(2, 0);
+    builder.DefaultApiVersion = new ApiVersion(3, 0);
     builder.AssumeDefaultVersionWhenUnspecified = true;
     builder.ReportApiVersions = true;
     builder.ApiVersionReader = ApiVersionReader.Combine(
@@ -30,7 +34,9 @@ builder.Services.AddVersionedApiExplorer(setup =>
     setup.SubstituteApiVersionInUrl = true;
 });
 
-builder.Services.AddControllers().ConfigureApiBehaviorOptions( opt =>
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
+
+builder.Services.AddControllers().ConfigureApiBehaviorOptions(opt =>
 {
     opt.SuppressModelStateInvalidFilter = true;
     opt.SuppressMapClientErrors = true;
@@ -65,8 +71,24 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+app.UseApiVersioning();
+var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
 app.UseSwagger();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        foreach (var d in provider.ApiVersionDescriptions)
+        {
+            c.SwaggerEndpoint(
+                $"/swagger/{d.GroupName}/swagger.json",
+                d.GroupName.ToUpperInvariant());
+        }
+    });
+}
+
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
