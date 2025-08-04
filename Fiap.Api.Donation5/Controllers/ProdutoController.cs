@@ -106,5 +106,20 @@ namespace Fiap.Api.Donation5.Controllers
 
             return Ok(produtoVM);
         }
+
+        [HttpPost]
+        public async Task<ActionResult<ProdutoResponseViewModel>> Post([FromBody] ProdutoRequestViewModel produtoRequest)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var produtoModel = _mapper.Map<ProdutoModel>(produtoRequest);
+            var produtoId = await _produtoRepository.InsertAsync(produtoModel);
+            var produtoResponse = _mapper.Map<ProdutoResponseViewModel>(produtoModel);
+
+            return CreatedAtAction(nameof(GetById), new {id = produtoId}, produtoResponse);
+        }
     }
 }

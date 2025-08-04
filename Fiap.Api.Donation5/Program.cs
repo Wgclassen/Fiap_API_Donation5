@@ -49,21 +49,19 @@ builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 
-var mapperConfig = new AutoMapper.MapperConfiguration(m => {
+builder.Services.AddAutoMapper(config =>
+{
+    config.CreateMap<ProdutoModel, ProdutoResponseViewModel>()
+    .ForMember(
+        dest => dest.NomeCategoria,
+        opt => opt.MapFrom(src => src.Categoria.NomeCategoria)
+        )
+    .ForMember(
+        dest => dest.NomeUsuario,
+        opt => opt.MapFrom(src => src.Usuario.NomeUsuario)
+        );
 
-    m.CreateMap<ProdutoRequestViewModel, ProdutoModel>();
-
-
-    m.CreateMap<ProdutoModel, ProdutoResponseViewModel>()
-    .ForMember(dest => dest.NomeCategoria,
-    opt => opt.MapFrom(src => src.Categoria.NomeCategoria == null ? string.Empty : src.Categoria.NomeCategoria)
-    )
-    .ForMember(dest => dest.NomeUsuario,
-    opt => opt.MapFrom(src => src.Usuario.NomeUsuario == null ? string.Empty : src.Usuario.NomeUsuario)
-    );
 });
-IMapper mapper = mapperConfig.CreateMapper();
-builder.Services.AddSingleton(mapper);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
