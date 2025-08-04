@@ -1,9 +1,8 @@
 ﻿using Asp.Versioning;
-using Fiap.Api.Donation5.Data;
 using Fiap.Api.Donation5.Models;
-using Fiap.Api.Donation5.Repository;
 using Fiap.Api.Donation5.Repository.Interfaces;
-using Microsoft.AspNetCore.Http;
+using Fiap.Api.Donation5.Services;
+using Fiap.Api.Donation5.ViewModel;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fiap.Api.Donation5.Controllers
@@ -18,10 +17,12 @@ namespace Fiap.Api.Donation5.Controllers
     {
 
         private readonly IProdutoRepository _produtoRepository;
+        private readonly AuthTokenService _authTokenService;
 
-        public ProdutoController(DataContext dataContext)
+        public ProdutoController(IProdutoRepository produtoRepository, IConfiguration configuration)
         {
-            _produtoRepository = new ProdutoRepository(dataContext);
+            _produtoRepository = produtoRepository;
+            _authTokenService = new AuthTokenService(configuration);
         }
 
         [HttpGet()]
@@ -71,14 +72,29 @@ namespace Fiap.Api.Donation5.Controllers
         }
 
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<ProdutoModel>> GetById(int id)
+        public async Task<ActionResult<ProdutoResponseViewModel>> GetById(int id)
         {
-            var produto = await _produtoRepository.FindByIdAsync(id);
+            var model = await _produtoRepository.FindByIdAsync(id);
 
-            if (produto == null)
+            if (model == null)
                 return NotFound();
 
-            return Ok(produto);
+
+            var produtoVM = new ProdutoResponseViewModel
+            {
+                ProdutoId = model.ProdutoId,
+                Nome = model.Nome,
+                Disponivel = model.Disponivel,
+                Descricao = model.Descricao,
+                SugestaoTroca = model.SugestaoTroca,
+                Valor = model.Valor,
+                DataExpiracao = model.DataExpiracao,
+                CategoriaId = model.CategoriaId,
+                NomeCategoria = model.Categoria?.NomeCategoria ?? string.Empty,
+                NomeUsuario = model.Usuario?.NomeUsuario ?? string.Empty
+            };
+
+            return Ok(produtoVM);
         }
     }
 }

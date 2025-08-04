@@ -1,8 +1,6 @@
-﻿using Fiap.Api.Donation5.Data;
-using Fiap.Api.Donation5.Models;
-using Fiap.Api.Donation5.Repository;
+﻿using Fiap.Api.Donation5.Models;
 using Fiap.Api.Donation5.Repository.Interfaces;
-using Microsoft.AspNetCore.Http;
+using Fiap.Api.Donation5.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Fiap.Api.Donation5.Controllers;
@@ -13,10 +11,12 @@ public class CategoriaController : ControllerBase
 {
 
     private readonly ICategoriaRepository _categoriaRepository;
+    private readonly AuthTokenService _authTokenService;
 
-    public CategoriaController(DataContext dataContext)
+    public CategoriaController(ICategoriaRepository categoriaRepository, IConfiguration configuration)
     {
-        _categoriaRepository = new CategoriaRepository(dataContext);
+        _categoriaRepository = categoriaRepository;
+        _authTokenService = new AuthTokenService(configuration);
     }
 
     [HttpGet]
