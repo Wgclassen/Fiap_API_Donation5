@@ -1,9 +1,12 @@
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
+using AutoMapper;
 using Fiap.Api.Donation5;
 using Fiap.Api.Donation5.Data;
+using Fiap.Api.Donation5.Models;
 using Fiap.Api.Donation5.Repository;
 using Fiap.Api.Donation5.Repository.Interfaces;
+using Fiap.Api.Donation5.ViewModel;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -45,6 +48,22 @@ builder.Services.AddDbContext<DataContext>(
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+
+var mapperConfig = new AutoMapper.MapperConfiguration(m => {
+
+    m.CreateMap<ProdutoRequestViewModel, ProdutoModel>();
+
+
+    m.CreateMap<ProdutoModel, ProdutoResponseViewModel>()
+    .ForMember(dest => dest.NomeCategoria,
+    opt => opt.MapFrom(src => src.Categoria.NomeCategoria == null ? string.Empty : src.Categoria.NomeCategoria)
+    )
+    .ForMember(dest => dest.NomeUsuario,
+    opt => opt.MapFrom(src => src.Usuario.NomeUsuario == null ? string.Empty : src.Usuario.NomeUsuario)
+    );
+});
+IMapper mapper = mapperConfig.CreateMapper();
+builder.Services.AddSingleton(mapper);
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

@@ -1,9 +1,11 @@
 ﻿using Asp.Versioning;
+using AutoMapper;
 using Fiap.Api.Donation5.Models;
 using Fiap.Api.Donation5.Repository.Interfaces;
 using Fiap.Api.Donation5.Services;
 using Fiap.Api.Donation5.ViewModel;
 using Microsoft.AspNetCore.Mvc;
+using System.Runtime.InteropServices;
 
 namespace Fiap.Api.Donation5.Controllers
 {
@@ -17,12 +19,12 @@ namespace Fiap.Api.Donation5.Controllers
     {
 
         private readonly IProdutoRepository _produtoRepository;
-        private readonly AuthTokenService _authTokenService;
+        private readonly IMapper _mapper;
 
-        public ProdutoController(IProdutoRepository produtoRepository, IConfiguration configuration)
+        public ProdutoController(IProdutoRepository produtoRepository, IMapper mapper)
         {
             _produtoRepository = produtoRepository;
-            _authTokenService = new AuthTokenService(configuration);
+            _mapper = mapper;
         }
 
         [HttpGet()]
@@ -43,23 +45,44 @@ namespace Fiap.Api.Donation5.Controllers
 
         [HttpGet()]
         [MapToApiVersion("2.0")]
-        public async Task<ActionResult<dynamic>> GetV2([FromQuery] int pagina = 0, [FromQuery] int tamanho = 5)
+        public async Task<ActionResult<ProdutoPaginadoResponseViewModel>> GetV2([FromQuery] int pagina = 0, [FromQuery] int tamanho = 5)
         {
-            var produtos = await _produtoRepository.FindAllAsync(pagina, tamanho) ?? new List<ProdutoModel>();
+
+            var apiVersion = HttpContext.GetRequestedApiVersion()?.ToString() ?? "2";
+
+            var produtoResponse = new ProdutoPaginadoResponseViewModel();
+
             var totalProdutos = await _produtoRepository.CountAsync();
-
-            var totalPaginas = Convert.ToInt16(Math.Ceiling((double)totalProdutos / tamanho));
-
-            var retorno = new
+            if (totalProdutos > 0)
             {
-                Total = totalProdutos,
-                TotalPaginas = totalPaginas,
-                LinkProximo = (pagina < totalPaginas - 1) ? $"/api/produto?{pagina + 1}=0&tamanho={tamanho}" : "",
-                LinkAnterior = (pagina > 0) ? $"/api/produto?{pagina - 1}=0&tamanho={tamanho}" : "",
-                Produtos = produtos
-            };
+                var produtos = await _produtoRepository.FindAllAsync(pagina, tamanho) ?? new List<ProdutoModel>();
+                var totalPaginas = Convert.ToInt16(Math.Ceiling((double)totalProdutos / tamanho));
 
-            return Ok(retorno);
+                produtoResponse.TotalPaginas = totalPaginas;
+                produtoResponse.TotalGeral = totalProdutos;
+                produtoResponse.LinkAnterior = (pagina > 0) ? $"/api/v{apiVersion}/produto?{pagina - 1}=0&tamanho={tamanho}" : "";
+                produtoResponse.LinkProximo = (pagina < totalPaginas - 1) ? $"/api/v{apiVersion}/produto?{pagina + 1}=0&tamanho={tamanho}" : "";
+                produtoResponse.Produtos = _mapper.Map<IList<ProdutoResponseViewModel>>(produtos);
+            }
+
+            return Ok(produtoResponse);
+
+
+            //var produtos = await _produtoRepository.FindAllAsync(pagina, tamanho) ?? new List<ProdutoModel>();
+            //var totalProdutos = await _produtoRepository.CountAsync();
+
+            //var totalPaginas = Convert.ToInt16(Math.Ceiling((double)totalProdutos / tamanho));
+
+            //var retorno = new
+            //{
+            //    Total = totalProdutos,
+            //    TotalPaginas = totalPaginas,
+            //    LinkProximo = (pagina < totalPaginas - 1) ? $"/api/v{apiVersion}/produto?{pagina + 1}=0&tamanho={tamanho}" : "",
+            //    LinkAnterior = (pagina > 0) ? $"/api/v{apiVersion}/produto?{pagina - 1}=0&tamanho={tamanho}" : "",
+            //    Produtos = produtos
+            //};
+
+
         }
 
         [HttpGet()]
@@ -79,20 +102,7 @@ namespace Fiap.Api.Donation5.Controllers
             if (model == null)
                 return NotFound();
 
-
-            var produtoVM = new ProdutoResponseViewModel
-            {
-                ProdutoId = model.ProdutoId,
-                Nome = model.Nome,
-                Disponivel = model.Disponivel,
-                Descricao = model.Descricao,
-                SugestaoTroca = model.SugestaoTroca,
-                Valor = model.Valor,
-                DataExpiracao = model.DataExpiracao,
-                CategoriaId = model.CategoriaId,
-                NomeCategoria = model.Categoria?.NomeCategoria ?? string.Empty,
-                NomeUsuario = model.Usuario?.NomeUsuario ?? string.Empty
-            };
+          var produtoVM = _mapper.Map<ProdutoResponseViewModel>(model);
 
             return Ok(produtoVM);
         }
