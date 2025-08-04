@@ -2,6 +2,8 @@ using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Fiap.Api.Donation5;
 using Fiap.Api.Donation5.Data;
+using Fiap.Api.Donation5.Repository;
+using Fiap.Api.Donation5.Repository.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -40,6 +42,10 @@ builder.Services.AddDbContext<DataContext>(
     options => options.UseSqlServer(connectionString).EnableSensitiveDataLogging()
     );
 
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
+builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -76,8 +82,6 @@ if (app.Environment.IsDevelopment())
         options.DocExpansion(DocExpansion.List);
     });
 }
-
-//app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

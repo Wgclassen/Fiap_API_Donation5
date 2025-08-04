@@ -13,33 +13,32 @@ namespace Fiap.Api.Donation5.Repository
             _dataContext = dataContext;
         }
 
-
-        public void Delete(int id)
+        public Task DeleteAsync(int id)
         {
             throw new NotImplementedException();
         }
 
-        public IList<UsuarioModel> FindAll()
+        public Task<IList<UsuarioModel>> FindAllAsync()
         {
             throw new NotImplementedException();
         }
 
-        public UsuarioModel FindByEmailAndSenha(string email, string senha)
+        public Task<UsuarioModel> FindByEmailAndSenhaAsync(string email, string senha)
         {
             throw new NotImplementedException();
         }
 
-        public UsuarioModel FindById(int id)
+        public Task<UsuarioModel> FindByIdAsync(int id)
         {
             throw new NotImplementedException();
         }
 
-        public int Insert(UsuarioModel usuarioModel)
+        public Task<int> InsertAsync(UsuarioModel usuarioModel)
         {
             throw new NotImplementedException();
         }
 
-        public void Update(UsuarioModel usuarioModel)
+        public Task UpdateAsync(UsuarioModel usuarioModel)
         {
             throw new NotImplementedException();
         }

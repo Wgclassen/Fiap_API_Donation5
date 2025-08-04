@@ -1,15 +1,11 @@
-﻿using Fiap.Api.Donation5.Data;
-using Fiap.Api.Donation5.Models;
+﻿using Fiap.Api.Donation5.Models;
 using Fiap.Api.Donation5.Repository.Interfaces;
-using Fiap.Api.Donation5.Repository;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity.Data;
 using Fiap.Api.Donation5.ViewModel;
 using Fiap.Api.Donation5.Services;
+using Fiap.Api.Donation5.Repository;
 
 namespace Fiap.Api.Donation5.Controllers;
-
 
 [Route("api/[controller]")]
 [ApiController]
@@ -18,23 +14,30 @@ public class UsuarioController : ControllerBase
     private readonly IUsuarioRepository _usuarioRepository;
     private readonly AuthTokenService _authTokenService;
 
-    public UsuarioController(DataContext dataContext, IConfiguration configuration)
+    public UsuarioController(IUsuarioRepository usuarioRepository, IConfiguration configuration)
     {
-        _usuarioRepository = new UsuarioRepository(dataContext);
+        _usuarioRepository = usuarioRepository;
         _authTokenService = new AuthTokenService(configuration);
     }
 
     [HttpGet]
-    public ActionResult<IList<UsuarioModel>> GetAll()
+    public async Task<ActionResult<IList<UsuarioModel>>> GetAll()
     {
-        var usuarios = _usuarioRepository.FindAll();
-        return Ok(usuarios);
+        var usuarios = await _usuarioRepository.FindAllAsync();
+
+        if (usuarios == null || usuarios.Count == 0)
+        {
+            return NoContent();
+        } else
+        {
+            return Ok(usuarios);
+        }
     }
 
     [HttpGet("{id}")]
-    public ActionResult<UsuarioModel> GetById(int id)
+    public async Task<ActionResult<UsuarioModel>> GetById(int id)
     {
-        var usuario = _usuarioRepository.FindById(id);
+        var usuario = await _usuarioRepository.FindByIdAsync(id);
         if (usuario == null)
             return NotFound();
 
@@ -42,45 +45,45 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpPost]
-    public ActionResult<UsuarioModel> Post([FromBody] UsuarioModel usuarioModel)
+    public async Task<ActionResult<UsuarioModel>> Post([FromBody] UsuarioModel usuarioModel)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var usuarioId = _usuarioRepository.Insert(usuarioModel);
+        var usuarioId = await _usuarioRepository.InsertAsync(usuarioModel);
         usuarioModel.UsuarioId = usuarioId;
 
         return CreatedAtAction(nameof(GetById), new { id = usuarioId }, usuarioModel);
     }
 
     [HttpPut("{id}")]
-    public IActionResult Put(int id, [FromBody] UsuarioModel usuarioModel)
+    public async Task<IActionResult> Put(int id, [FromBody] UsuarioModel usuarioModel)
     {
         if (id != usuarioModel.UsuarioId)
             return BadRequest("ID da URL diferente do corpo da requisição.");
 
-        _usuarioRepository.Update(usuarioModel);
+        await _usuarioRepository.UpdateAsync(usuarioModel);
         return NoContent();
     }
 
     [HttpDelete("{id}")]
-    public IActionResult Delete(int id)
+    public async Task<IActionResult> DeleteAsync(int id)
     {
-        var usuario = _usuarioRepository.FindById(id);
+        var usuario = await _usuarioRepository.FindByIdAsync(id);
         if (usuario == null)
             return NotFound();
 
-        _usuarioRepository.Delete(id);
+        _usuarioRepository.DeleteAsync(id);
         return NoContent();
     }
 
     [HttpPost]
     [Route("Login")]
-    public ActionResult<LoginResponseViewModel> Login([FromBody] LoginRequestViewModel loginRequest)
+    public async Task<ActionResult<LoginResponseViewModel>> Login([FromBody] LoginRequestViewModel loginRequest)
     {
         if (ModelState.IsValid)
         {
-            var usuario = _usuarioRepository.FindByEmailAndSenha(loginRequest.EmailUsuario, loginRequest.Senha);
+            var usuario = await _usuarioRepository.FindByEmailAndSenhaAsync(loginRequest.EmailUsuario, loginRequest.Senha);
 
             if (usuario != null)
             {
