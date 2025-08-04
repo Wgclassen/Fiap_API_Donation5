@@ -1,40 +1,16 @@
+using Asp.Versioning;
+using Asp.Versioning.ApiExplorer;
 using Fiap.Api.Donation5;
 using Fiap.Api.Donation5.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ApiExplorer;
-using Microsoft.AspNetCore.Mvc.Versioning;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.IdentityModel.Tokens.Experimental;
 using Swashbuckle.AspNetCore.SwaggerGen;
-using System.Security.Cryptography;
+using Swashbuckle.AspNetCore.SwaggerUI;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddApiVersioning(builder =>
-{
-    builder.DefaultApiVersion = new ApiVersion(3, 0);
-    builder.AssumeDefaultVersionWhenUnspecified = true;
-    builder.ReportApiVersions = true;
-    builder.ApiVersionReader = ApiVersionReader.Combine(
-        new HeaderApiVersionReader("x-api-version"),
-        new QueryStringApiVersionReader(),
-        new UrlSegmentApiVersionReader()
-        );
-});
-
-builder.Services.AddVersionedApiExplorer(setup =>
-{
-    setup.GroupNameFormat = "'v'VVV";
-    setup.SubstituteApiVersionInUrl = true;
-});
-
-builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
 builder.Services.AddControllers().ConfigureApiBehaviorOptions(opt =>
 {
@@ -42,8 +18,22 @@ builder.Services.AddControllers().ConfigureApiBehaviorOptions(opt =>
     opt.SuppressMapClientErrors = true;
 });
 
-
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddApiVersioning(options =>
+{
+    options.DefaultApiVersion = new Asp.Versioning.ApiVersion(3, 0);
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+})
+    .AddApiExplorer(setup =>
+    {
+        setup.GroupNameFormat = "'v'VVV";
+        setup.SubstituteApiVersionInUrl = true;
+    });
+
+builder.Services.AddTransient<IConfigureOptions<SwaggerGenOptions>, ConfigureSwaggerOptions>();
 
 var connectionString = builder.Configuration.GetConnectionString("databaseUrl");
 builder.Services.AddDbContext<DataContext>(
@@ -65,36 +55,32 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
     });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
 var app = builder.Build();
 
-app.UseApiVersioning();
 var provider = app.Services.GetRequiredService<IApiVersionDescriptionProvider>();
 
 app.UseSwagger();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c =>
+    app.UseSwaggerUI(options =>
     {
         foreach (var d in provider.ApiVersionDescriptions)
         {
-            c.SwaggerEndpoint(
+            options.SwaggerEndpoint(
                 $"/swagger/{d.GroupName}/swagger.json",
-                d.GroupName.ToUpperInvariant());
+                d.GroupName.ToUpperInvariant()
+                );
+
         }
+        options.DocExpansion(DocExpansion.List);
     });
 }
 
-app.UseSwaggerUI();
+//app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();

@@ -1,4 +1,5 @@
-﻿using Fiap.Api.Donation5.Data;
+﻿using Asp.Versioning;
+using Fiap.Api.Donation5.Data;
 using Fiap.Api.Donation5.Models;
 using Fiap.Api.Donation5.Repository;
 using Fiap.Api.Donation5.Repository.Interfaces;
@@ -24,7 +25,7 @@ namespace Fiap.Api.Donation5.Controllers
         }
 
         [HttpGet()]
-        [ApiVersion("3.0")]
+        [MapToApiVersion("3.0")]
         public async Task<ActionResult<dynamic>> GetV3([FromQuery] int idRef = 0, [FromQuery] int tamanho = 5)
         {
             var produtos = await _produtoRepository.FindAllByIdRefAsync(idRef, tamanho) ?? new List<ProdutoModel>();
@@ -40,7 +41,7 @@ namespace Fiap.Api.Donation5.Controllers
         }
 
         [HttpGet()]
-        [ApiVersion("2.0")]
+        [MapToApiVersion("2.0")]
         public async Task<ActionResult<dynamic>> GetV2([FromQuery] int pagina = 0, [FromQuery] int tamanho = 5)
         {
             var produtos = await _produtoRepository.FindAllAsync(pagina, tamanho) ?? new List<ProdutoModel>();
@@ -61,7 +62,7 @@ namespace Fiap.Api.Donation5.Controllers
         }
 
         [HttpGet()]
-        [ApiVersion("1.0", Deprecated = true)]
+        [MapToApiVersion("1.0")]
         public async Task<ActionResult<ProdutoModel>> GetV1()
         {
             var produtos = await _produtoRepository.FindAllAsync() ?? new List<ProdutoModel>();
